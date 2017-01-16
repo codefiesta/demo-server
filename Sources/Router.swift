@@ -44,10 +44,7 @@ struct Router {
         }
 
         response.appendBody(string: "<p>User logged in with \(username) : \(password)")
-        print("Adding cookie")
-        let cookie = HTTPCookie(name: cookieName, value: username)
-        response.addCookie(cookie)
-
+        writeCookie(username, request, response)
         print("\(username) : \(password)")
     }
 
@@ -62,16 +59,50 @@ struct Router {
         response.completed()
     }
 
+
+    // Sample Data Route
+    static func dataHandler(request: HTTPRequest, _ response: HTTPResponse) {
+        
+    }
+
     // Helper method to determine if cookie is valid
     static func isAuthenticated(_ request: HTTPRequest) -> Bool {
 
         for (key, value) in request.cookies {
-            if key == cookieName, let _ = Database.users[value] {
+            if key == cookieName, let username = cookieComponents(value).username, let _ = Database.users[username] {
                 print("Found Valid Cookie for user: \(value)")
                 return true
             }
         }
         return false
+    }
+
+    static func writeCookie(_ username: String, _ request: HTTPRequest, _ response: HTTPResponse) {
+        print("Adding cookie")
+
+        guard let agent = request.header(HTTPRequestHeader.Name.userAgent) else {
+            return
+        }
+
+        let ip = request.remoteAddress.host
+
+        let value = "\(username)|\(agent)|\(ip)"
+
+        print("Writing cookie : \(value)")
+
+        let cookie = HTTPCookie(name: cookieName, value: value)
+        response.addCookie(cookie)
+
+
+    }
+
+    static func cookieComponents(_ cookie: String) -> (username: String?, ip: String?, agent: String?) {
+
+        print("Checking: \(cookie)")
+
+        let parts = cookie.components(separatedBy: "|")
+
+        return (parts[0], parts[1], parts[2])
     }
 }
 
