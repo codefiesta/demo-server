@@ -46,6 +46,4 @@ struct Database {
         "4": Data("4", "test4")
     ]
 
-
-
 }
