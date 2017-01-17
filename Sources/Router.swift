@@ -16,6 +16,7 @@ struct Router {
 
         var routes = Routes()
         routes.add(method: .get, uri: "", handler: Router.indexHandler)
+        routes.add(method: .get, uri: "/status", handler: Router.statusHandler)
         routes.add(method: .post, uri: "/login", handler: Router.loginHandler)
         routes.add(method: .get, uri: "/secure", handler: Router.secureHandler)
         return routes
@@ -24,6 +25,13 @@ struct Router {
     // Home Route
     static func indexHandler(request: HTTPRequest, _ response: HTTPResponse) {
         response.appendBody(string: "<p>Demo Server</p>")
+        response.completed()
+    }
+
+    // Status Route
+    static func statusHandler(request: HTTPRequest, _ response: HTTPResponse) {
+        response.addHeader(.contentType, value: "application/json" )
+        response.appendBody(string: "{ \"echo\": \"\(request.remoteAddress.host)\" }")
         response.completed()
     }
 
